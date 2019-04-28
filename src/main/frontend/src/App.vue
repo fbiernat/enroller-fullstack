@@ -133,7 +133,7 @@ export default {
 <style>
 #app {
   max-width: 1000px;
-  margin: 0 auto;
+  margin: 30px auto;
 }
 
 .logo {
