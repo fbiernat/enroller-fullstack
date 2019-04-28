@@ -9,4 +9,3 @@
 *.iml
 src/main/resources/public/
 *.db
-src/main/frontend/package-lock.json
