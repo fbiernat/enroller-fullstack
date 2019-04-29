@@ -1,10 +1,13 @@
 package com.company.enroller.persistence;
 
-import com.company.enroller.model.Meeting;
+import java.util.Collection;
+
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
+import org.hibernate.Transaction;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
+import com.company.enroller.model.Meeting;
 
 @Component("meetingService")
 public class MeetingService {
@@ -20,6 +23,20 @@ public class MeetingService {
         Query query = connector.getSession().createQuery(hql);
         return query.list();
     }
+    
+    public Meeting get(long meetingId) {
+    	return (Meeting) connector.getSession().get(Meeting.class, meetingId);
+    }
 
+	public Object add(Meeting meeting) {
+		try {
+			Transaction transaction = connector.getSession().beginTransaction();
+			connector.getSession().save(meeting);
+			transaction.commit();
+			return meeting;
+		} catch (HibernateException e) {
+			return null;
+		}
+	}
 
 }

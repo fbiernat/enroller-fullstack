@@ -1,11 +1,18 @@
 package com.company.enroller.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import javax.persistence.*;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "meeting")
@@ -16,6 +23,7 @@ public class Meeting {
     private long id;
 
     @Column
+    @JsonProperty("name")
     private String title;
 
     @Column
@@ -24,7 +32,6 @@ public class Meeting {
     @Column
     private String date;
 
-    @JsonIgnore
     @ManyToMany(mappedBy = "meetings")
     Set<Participant> participants = new HashSet<>();
 
