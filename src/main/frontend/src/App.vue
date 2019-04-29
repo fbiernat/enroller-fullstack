@@ -10,7 +10,7 @@
       <img src="./assets/logo.svg" alt="Enroller" class="logo">
       System do zapisów na zajęcia
     </h1>
-    <div>
+    <div v-if="!authenticatedUsername">
       <button
         class="button"
         v-bind:class="{ 'button-outline': !isNotLoggedIn}"
@@ -21,8 +21,12 @@
         v-bind:class="{ 'button-outline': isNotLoggedIn}"
         @click="showRegisterForm()"
       >Rejestruję się</button>
+      <div>
+      <login-form v-if="isNotLoggedIn" @login="login($event)"></login-form>
+      <login-form v-else @login="register($event)" button-label="Zarejestruj się"></login-form>
     </div>
-    <div v-if="authenticatedUsername">
+    </div>
+    <div v-else>
       <h2>
         Witaj {{ authenticatedUsername }}!
         <a
@@ -32,10 +36,7 @@
       </h2>
       <meetings-page :username="authenticatedUsername"></meetings-page>
     </div>
-    <div v-else>
-      <login-form v-if="isNotLoggedIn" @login="login($event)"></login-form>
-      <login-form v-else @login="register($event)" button-label="Zarejestruj się"></login-form>
-    </div>
+    
   </div>
 </template>
 
@@ -58,64 +59,6 @@ export default {
     };
   },
   methods: {
-    login(user) {
-      if (user.login == "" || user.password == "") {
-        Utils.notify(
-          this,
-          "error",
-          "Wprowadź dane",
-          "Wypełnij pola login i hasło"
-        );
-      } else {
-        if (failedLoginCount > 15) {
-          if (!timeoutHandle) {
-            timeoutHandle = setTimeout(() => {
-              // alert('Login available again');
-              failedLoginCount = 0;
-              clearTimeout(timeoutHandle);
-              timeoutHandle = undefined;
-            }, 60000);
-          }
-          Utils.notify(
-            this,
-            "error",
-            "Błąd",
-            "Zbyt wiele nieudanych prób logowania, spróboj za minutę"
-          );
-        } else {
-          this.$http
-            .post("tokens", user)
-            .then(response => {
-              const token = response.body.token;
-              Vue.http.headers.common.Authorization = 'Bearer ' + token;
-
-              this.authenticatedUsername = user.login;
-              localStorage.setItem('username', this.authenticatedUsername);
-              failedLoginCount = 0;
-            })
-            .catch(response => {
-              if (response.status == 401) {
-                Utils.notify(
-                  this,
-                  "error",
-                  "Błędne dane",
-                  "Błędny login lub hasło" +
-                    ((failedLoginCount > 10) ? ", pozostało <b>" +
-                    (5 - (failedLoginCount - 10)) + "</b> prób": "")
-                );
-                failedLoginCount++;
-              } else {
-                Utils.notify(this, "error", "Błąd", "Ups, coś poszło nie tak");
-              }
-            });
-        }
-      }
-    },
-    logout() {
-      delete Vue.http.headers.Authorization;
-      localStorage.removeItem('username');
-      this.authenticatedUsername = "";
-    },
     register(user) {
       if (
         user.login == "" ||
@@ -161,6 +104,68 @@ export default {
           });
       }
     },
+    login(user) {
+      if (user.login == "" || user.password == "") {
+        Utils.notify(
+          this,
+          "error",
+          "Wprowadź dane",
+          "Wypełnij pola login i hasło"
+        );
+      } else {
+        if (failedLoginCount > 15) {
+          if (!timeoutHandle) {
+            timeoutHandle = setTimeout(() => {
+              // alert('Login available again');
+              failedLoginCount = 0;
+              clearTimeout(timeoutHandle);
+              timeoutHandle = undefined;
+            }, 60000);
+          }
+          Utils.notify(
+            this,
+            "error",
+            "Błąd",
+            "Zbyt wiele nieudanych prób logowania, spróboj za minutę"
+          );
+        } else {
+          this.$http
+            .post("tokens", user)
+            .then(response => {
+              const token = response.body.token;
+              this.storeAuth(user.login, token);
+              
+              failedLoginCount = 0;
+            })
+            .catch(response => {
+              if (response.status == 401) {
+                Utils.notify(
+                  this,
+                  "error",
+                  "Błędne dane",
+                  "Błędny login lub hasło" +
+                    ((failedLoginCount > 10) ? ", pozostało <b>" +
+                    (5 - (failedLoginCount - 10)) + "</b> prób": "")
+                );
+                failedLoginCount++;
+              } else {
+                Utils.notify(this, "error", "Błąd", "Ups, coś poszło nie tak");
+              }
+            });
+        }
+      }
+    },
+    storeAuth(username, token) {
+      this.authenticatedUsername = username;
+      Vue.http.headers.common.Authorization = 'Bearer ' + token;
+      localStorage.setItem('username', username);
+      localStorage.setItem('token', token);
+    },
+    logout() {
+      delete Vue.http.headers.Authorization;
+      localStorage.removeItem('username');
+      this.authenticatedUsername = "";
+    },
     showLoginForm() {
       this.isNotLoggedIn = true;
     },
@@ -169,7 +174,13 @@ export default {
     }
   },
   mounted() {
-    this.authenticatedUsername = localStorage.getItem('username') || '';
+    const username = localStorage.getItem('username');
+    const token = localStorage.getItem('token');
+    if (username && token) {
+      this.storeAuth(username, token);
+      // if token expired or user has been deleted - logout
+      this.$http.get(`participants/${username}`).catch(() => this.logout());
+    }
   }
 };
 
@@ -194,7 +205,7 @@ setInterval(() => {
   padding: 10px;
   margin: 5px 5px 0;
 
-  font-size: 12px;
+  font-size: 14px;
 
   color: #ffffff;
   background: #44a4fc;
