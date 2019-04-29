@@ -3,6 +3,7 @@
     <thead>
     <tr>
       <th>Nazwa spotkania</th>
+      <th>Data</th>
       <th>Opis</th>
       <th>Uczestnicy</th>
       <td></td>
@@ -11,6 +12,10 @@
     <tbody>
     <tr v-for="meeting in meetings" :key="meeting.name">
       <td>{{ meeting.name }}</td>
+      <td>
+        <span v-if="meeting.date">{{meeting.date}}</span>
+        <span v-else>Brak</span>
+      </td>
       <td>{{ meeting.description }}</td>
       <td>
         <ul v-if="meeting.participants">
