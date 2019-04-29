@@ -8,6 +8,7 @@ import org.hibernate.Transaction;
 import org.springframework.stereotype.Component;
 
 import com.company.enroller.model.Meeting;
+import com.company.enroller.model.Participant;
 
 @Component("meetingService")
 public class MeetingService {
@@ -30,6 +31,18 @@ public class MeetingService {
 
 	public Object add(Meeting meeting) {
 		try {
+			Transaction transaction = connector.getSession().beginTransaction();
+			connector.getSession().save(meeting);
+			transaction.commit();
+			return meeting;
+		} catch (HibernateException e) {
+			return null;
+		}
+	}
+
+	public Object addParticipant(Meeting meeting, Participant participant) {
+		try {
+			meeting.addParticipant(participant);
 			Transaction transaction = connector.getSession().beginTransaction();
 			connector.getSession().save(meeting);
 			transaction.commit();
