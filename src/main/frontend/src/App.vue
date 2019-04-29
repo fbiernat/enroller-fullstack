@@ -45,6 +45,8 @@ import LoginForm from "./LoginForm";
 import MeetingsPage from "./meetings/MeetingsPage";
 import Utils from './utils';
 
+var failedLoginCount = 0;
+var timeoutHandle;
 
 export default {
   components: { LoginForm, MeetingsPage },
@@ -57,9 +59,33 @@ export default {
   methods: {
     login(user) {
       if (user.login == '' || user.password == '') {
-        Utils.notify(this, 'error', 'Wprowadź dane', 'Wypełnij login i hasło');
+        Utils.notify(this, 'error', 'Wprowadź dane', 'Wypełnij pola login i hasło');
+      } else {
+        if (failedLoginCount > 15) {
+          if (!timeoutHandle) {
+            timeoutHandle = setTimeout(() => {
+              // alert('Login available again');
+              failedLoginCount = 0;
+              clearTimeout(timeoutHandle);
+              timeoutHandle = undefined;
+            }, 60000);
+          }
+          Utils.notify(this, 'error', 'Błąd', 'Zbyt wiele prób logowania, spróboj za minutę');
+        } else {
+          this.$http.post("tokens", user)
+          .then(response => {
+            this.authenticatedUsername = user.login;
+          })
+          .catch(response => {
+            if (response.status == 401) {
+                Utils.notify(this, 'error', 'Błędne dane', 'Błędny login lub hasło');
+                failedLoginCount++;
+            } else {
+              Utils.notify(this, 'error', 'Błąd', 'Ups, coś poszło nie tak');
+            }
+          });
+        }
       }
-      this.authenticatedUsername = user.login;
     },
     logout() {
       this.authenticatedUsername = "";
@@ -71,50 +97,19 @@ export default {
         user.login == undefined ||
         user.password == undefined
       ) {
-        // notify(this, 'success', 'Test', 'test test');
-        // this.$notify({
-        //   group: "main-notifications",
-        //   title: "Brak danych",
-        //   text: "Wprowadź login i hasło użytkownika!",
-        //   type: "error",
-        //   classes: "notifications"
-        // });
         Utils.notify(this, 'error', 'Brak danych', 'Wprowadź login i hasło użytkownika');
       } else {
-        // rejestruj uzytkownika
+        // Register user
         this.$http
           .post("participants", user)
           .then(response => {
-            // this.$notify({
-            //   group: "main-notifications",
-            //   title: "Zarejestrowano użytkownika",
-            //   text:
-            //     "Pomyślnie zarejestrowano użytkownika <b>" +
-            //     user.login +
-            //     "</b>.",
-            //   type: "success"
-            // });
             Utils.notify(this, 'success', 'Zarejestrowano użytkownika', 'Pomyślnie zarejestrowano użytkownika <b>' + user.login + '</b>.');
           })
           .catch(response => {
-            // nie udało się
-            console.log(response);
+            // Error
             if (response.status == 504) {
-              // server down
-              // this.$notify({
-              //   group: "main-notifications",
-              //   title: "Nie można połączyć z usługą",
-              //   text: "Aktualnie usługa jest niedostępna, spróbuj później.",
-              //   type: "warn"
-              // });
               Utils.notify(this, 'warn', 'Nie można połączyć z usługą', 'Aktualnie usługa jest niedostępna, spróbuj ponownie później');
             } else {
-              // this.$notify({
-              //   group: "main-notifications",
-              //   title: "Nie można zarejestrować użytkownika",
-              //   text: "Użytkownik <b>" + user.login + "</b> już istnieje.",
-              //   type: "error"
-              // });
               Utils.notify(this, 'error', 'Nie można zarejestrować użytkownika', 'Użytkownik <b>' + user.login + '</b> już istnieje.');
             }
           });
