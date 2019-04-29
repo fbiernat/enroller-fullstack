@@ -43,10 +43,10 @@
 import "milligram";
 import LoginForm from "./LoginForm";
 import MeetingsPage from "./meetings/MeetingsPage";
-import Utils from './utils';
+import Utils from "./utils";
 
-var failedLoginCount = 0;
-var timeoutHandle;
+let failedLoginCount = 0;
+let timeoutHandle;
 
 export default {
   components: { LoginForm, MeetingsPage },
@@ -58,8 +58,13 @@ export default {
   },
   methods: {
     login(user) {
-      if (user.login == '' || user.password == '') {
-        Utils.notify(this, 'error', 'Wprowadź dane', 'Wypełnij pola login i hasło');
+      if (user.login == "" || user.password == "") {
+        Utils.notify(
+          this,
+          "error",
+          "Wprowadź dane",
+          "Wypełnij pola login i hasło"
+        );
       } else {
         if (failedLoginCount > 15) {
           if (!timeoutHandle) {
@@ -70,20 +75,33 @@ export default {
               timeoutHandle = undefined;
             }, 60000);
           }
-          Utils.notify(this, 'error', 'Błąd', 'Zbyt wiele prób logowania, spróboj za minutę');
+          Utils.notify(
+            this,
+            "error",
+            "Błąd",
+            "Zbyt wiele prób logowania, spróboj za minutę"
+          );
         } else {
-          this.$http.post("tokens", user)
-          .then(response => {
-            this.authenticatedUsername = user.login;
-          })
-          .catch(response => {
-            if (response.status == 401) {
-                Utils.notify(this, 'error', 'Błędne dane', 'Błędny login lub hasło');
+          this.$http
+            .post("tokens", user)
+            .then(response => {
+              this.authenticatedUsername = user.login;
+            })
+            .catch(response => {
+              if (response.status == 401) {
+                Utils.notify(
+                  this,
+                  "error",
+                  "Błędne dane",
+                  "Błędny login lub hasło" +
+                    ((failedLoginCount > 10) ? ", pozostało <b>" +
+                    (5 - (failedLoginCount - 10)) + "</b> prób": "")
+                );
                 failedLoginCount++;
-            } else {
-              Utils.notify(this, 'error', 'Błąd', 'Ups, coś poszło nie tak');
-            }
-          });
+              } else {
+                Utils.notify(this, "error", "Błąd", "Ups, coś poszło nie tak");
+              }
+            });
         }
       }
     },
@@ -97,20 +115,40 @@ export default {
         user.login == undefined ||
         user.password == undefined
       ) {
-        Utils.notify(this, 'error', 'Brak danych', 'Wprowadź login i hasło użytkownika');
+        Utils.notify(
+          this,
+          "error",
+          "Brak danych",
+          "Wprowadź login i hasło użytkownika"
+        );
       } else {
         // Register user
         this.$http
           .post("participants", user)
           .then(response => {
-            Utils.notify(this, 'success', 'Zarejestrowano użytkownika', 'Pomyślnie zarejestrowano użytkownika <b>' + user.login + '</b>.');
+            Utils.notify(
+              this,
+              "success",
+              "Zarejestrowano użytkownika",
+              "Pomyślnie zarejestrowano użytkownika <b>" + user.login + "</b>."
+            );
           })
           .catch(response => {
             // Error
             if (response.status == 504) {
-              Utils.notify(this, 'warn', 'Nie można połączyć z usługą', 'Aktualnie usługa jest niedostępna, spróbuj ponownie później');
+              Utils.notify(
+                this,
+                "warn",
+                "Nie można połączyć z usługą",
+                "Aktualnie usługa jest niedostępna, spróbuj ponownie później"
+              );
             } else {
-              Utils.notify(this, 'error', 'Nie można zarejestrować użytkownika', 'Użytkownik <b>' + user.login + '</b> już istnieje.');
+              Utils.notify(
+                this,
+                "error",
+                "Nie można zarejestrować użytkownika",
+                "Użytkownik <b>" + user.login + "</b> już istnieje."
+              );
             }
           });
       }
