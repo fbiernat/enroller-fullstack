@@ -3,6 +3,7 @@ package com.company.enroller.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -12,7 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @EnableWebSecurity
-@PropertySource("classpath:application.properties")
 public class WebSecurity extends WebSecurityConfigurerAdapter {
 	
 	@Autowired
@@ -34,11 +34,13 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		http.csrf().disable()
 			.authorizeRequests()
-			.anyRequest().permitAll()
+			.antMatchers(HttpMethod.POST, "/api/participants").permitAll()
+			.antMatchers("/api/tokens").permitAll()
+			.antMatchers("/api/**").authenticated()
 			.and()
-			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-		
-		http.addFilterBefore(new JWTAuthenticationFilter(authenticationManager(), secret, issuer, tokenExpiration), UsernamePasswordAuthenticationFilter.class);
+			.addFilterBefore(new JWTAuthenticationFilter(authenticationManager(), secret, issuer, tokenExpiration), UsernamePasswordAuthenticationFilter.class)
+			.addFilter(new JWTAuthorizationFilter(authenticationManager(), secret))
+			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);			
 	}
 	
 	@Override
