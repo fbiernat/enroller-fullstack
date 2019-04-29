@@ -13,12 +13,12 @@
     <div>
       <button
         class="button"
-        v-bind:class="{ 'button-outline': !isLogin}"
+        v-bind:class="{ 'button-outline': !isNotLoggedIn}"
         @click="showLoginForm()"
       >Loguję się</button>
       <button
         class="button"
-        v-bind:class="{ 'button-outline': isLogin}"
+        v-bind:class="{ 'button-outline': isNotLoggedIn}"
         @click="showRegisterForm()"
       >Rejestruję się</button>
     </div>
@@ -33,7 +33,7 @@
       <meetings-page :username="authenticatedUsername"></meetings-page>
     </div>
     <div v-else>
-      <login-form v-if="isLogin" @login="login($event)"></login-form>
+      <login-form v-if="isNotLoggedIn" @login="login($event)"></login-form>
       <login-form v-else @login="register($event)" button-label="Zarejestruj się"></login-form>
     </div>
   </div>
@@ -43,6 +43,7 @@
 import "milligram";
 import LoginForm from "./LoginForm";
 import MeetingsPage from "./meetings/MeetingsPage";
+import Vue from "vue";
 import Utils from "./utils";
 
 let failedLoginCount = 0;
@@ -52,7 +53,7 @@ export default {
   components: { LoginForm, MeetingsPage },
   data() {
     return {
-      isLogin: true,
+      isNotLoggedIn: true,
       authenticatedUsername: ""
     };
   },
@@ -79,13 +80,18 @@ export default {
             this,
             "error",
             "Błąd",
-            "Zbyt wiele prób logowania, spróboj za minutę"
+            "Zbyt wiele nieudanych prób logowania, spróboj za minutę"
           );
         } else {
           this.$http
             .post("tokens", user)
             .then(response => {
+              const token = response.body.token;
+              Vue.http.headers.common.Authorization = 'Bearer ' + token;
+
               this.authenticatedUsername = user.login;
+              localStorage.setItem('username', this.authenticatedUsername);
+              failedLoginCount = 0;
             })
             .catch(response => {
               if (response.status == 401) {
@@ -106,6 +112,8 @@ export default {
       }
     },
     logout() {
+      delete Vue.http.headers.Authorization;
+      localStorage.removeItem('username');
       this.authenticatedUsername = "";
     },
     register(user) {
@@ -154,13 +162,22 @@ export default {
       }
     },
     showLoginForm() {
-      this.isLogin = true;
+      this.isNotLoggedIn = true;
     },
     showRegisterForm() {
-      this.isLogin = false;
+      this.isNotLoggedIn = false;
     }
+  },
+  mounted() {
+    this.authenticatedUsername = localStorage.getItem('username') || '';
   }
 };
+
+setInterval(() => {
+  // clear failed login count every 3 minutes
+  if (!timeoutHandle)
+    failedLoginCount = 0;
+}, 180000);
 </script>
 
 <style>
