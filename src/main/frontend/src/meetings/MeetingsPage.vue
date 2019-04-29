@@ -20,6 +20,7 @@
 <script>
     import NewMeetingForm from "./NewMeetingForm";
     import MeetingsList from "./MeetingsList";
+    import Utils from "./../utils";
 
     export default {
         components: {NewMeetingForm, MeetingsList},
@@ -31,10 +32,25 @@
         },
         methods: {
             loadMeetings() {
-                this.$http.get('meetings').then(response => console.log(response.body));
+                this.$http.get('meetings').then(response => {
+                    console.log(response.body);
+                    this.meetings = response.data;
+                })
+                .catch(response => {
+                    Utils.notify(this, 'error', 'Błąd', 'Nie udało się załadować listy zajęc');
+                });
             },
             addNewMeeting(meeting) {
-                this.meetings.push(meeting);
+                // this.meetings.push(meeting);
+                this.$http.post('meetings', meeting)
+                .then(response => {
+
+                    Utils.notify(this, 'success', 'Dodano zajęcia', 'Pomyślnie dodano zajęcia');
+                    this.loadMeetings();
+                })
+                .catch(response => {
+                    Utils.notify(this, 'error', 'Bład dodawania zajęć', 'Wystąpił błąd w trakcie dodawania zajęć');
+                });
             },
             addMeetingParticipant(meeting) {
                 meeting.participants.push(this.username);
@@ -46,7 +62,7 @@
                 this.meetings.splice(this.meetings.indexOf(meeting), 1);
             }
         },
-        created() {
+        mounted() {
             this.loadMeetings();
         }
     }
