@@ -30,6 +30,9 @@
             };
         },
         methods: {
+            loadMeetings() {
+                this.$http.get('meetings').then(response => console.log(response.body));
+            },
             addNewMeeting(meeting) {
                 this.meetings.push(meeting);
             },
@@ -42,6 +45,9 @@
             deleteMeeting(meeting) {
                 this.meetings.splice(this.meetings.indexOf(meeting), 1);
             }
+        },
+        created() {
+            this.loadMeetings();
         }
     }
 </script>
