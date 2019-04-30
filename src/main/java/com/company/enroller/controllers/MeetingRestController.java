@@ -48,10 +48,15 @@ public class MeetingRestController {
     	if (meeting == null) {
     		return new ResponseEntity<String>("Meeting doesn't exist", HttpStatus.BAD_REQUEST);
     	}
-    	Meeting result = (Meeting) meetingService.addParticipant(meeting, participant);
-    	if (result == null) {
-    		return new ResponseEntity<String>("Unable to add participant", HttpStatus.INTERNAL_SERVER_ERROR);
-    	} 
-    	return new ResponseEntity<Meeting>(result, HttpStatus.CREATED);
+    	if (!meeting.hasParticipant(participant)) {
+            Meeting result = (Meeting) meetingService.addParticipant(meeting, participant);
+            if (result == null) {
+                return new ResponseEntity<String>("Unable to add participant", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+            return new ResponseEntity<Meeting>(result, HttpStatus.CREATED);
+        } else {
+    	    // particpant already enrolled
+            return new ResponseEntity<String>("Participant already enrolled", HttpStatus.CONFLICT);
+        }
     }
 }

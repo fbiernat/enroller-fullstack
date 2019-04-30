@@ -33,7 +33,6 @@
         methods: {
             loadMeetings() {
                 this.$http.get('meetings').then(response => {
-                    console.log(response.body);
                     this.meetings = response.data;
                 })
                 .catch(response => {
@@ -44,7 +43,6 @@
                 // this.meetings.push(meeting);
                 this.$http.post('meetings', meeting)
                 .then(response => {
-
                     Utils.notify(this, 'success', 'Dodano zajęcia', 'Pomyślnie dodano zajęcia');
                     this.loadMeetings();
                 })
@@ -53,7 +51,15 @@
                 });
             },
             addMeetingParticipant(meeting) {
-                meeting.participants.push(this.username);
+                let url = 'meetings/' + meeting.id;
+                this.$http.post(url, this.username)
+                .then(response => {
+                    Utils.notify(this, 'success', 'Zapisano na zajęcia', 'Zapis na zajęcia przebiegł pomyślnie');
+                    this.loadMeetings();
+                })
+                .catch(response => {
+                    Utils.notify(this, 'error', 'Błąd podczas zapisu na zajęcia', 'Nie udało się dopisać Cię do zajęć, spróbój później');
+                });
             },
             removeMeetingParticipant(meeting) {
                 meeting.participants.splice(meeting.participants.indexOf(this.username), 1);

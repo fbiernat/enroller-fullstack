@@ -10,22 +10,22 @@
     </tr>
     </thead>
     <tbody>
-    <tr v-for="meeting in meetings" :key="meeting.name">
+    <tr v-for="meeting in meetings" :key="meeting.id">
       <td>{{ meeting.name }}</td>
-      <td>
+      <td style="min-width: 120px;">
         <span v-if="meeting.date">{{meeting.date}}</span>
         <span v-else>Brak</span>
       </td>
       <td>{{ meeting.description }}</td>
       <td>
         <ul v-if="meeting.participants">
-          <li v-for="participant in meeting.participants" :key="participant">
-            {{ participant }}
+          <li v-for="participant in meeting.participants" :key="participant.login">
+            {{ participant.login }}
           </li>
         </ul>
       </td>
       <td style="text-align: right; min-width: 400px">
-        <button v-if="meeting.participants.indexOf(username) < 0" class="button-outline"
+        <button v-if="meeting.participants.find(o => o.login !== username)" class="button-outline"
                 @click="$emit('attend', meeting)">
           Zapisz się
         </button>
