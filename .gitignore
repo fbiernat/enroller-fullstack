@@ -10,3 +10,4 @@
 src/main/resources/public/
 *.db
 dev-utils/
+src/main/frontend/.vscode/
