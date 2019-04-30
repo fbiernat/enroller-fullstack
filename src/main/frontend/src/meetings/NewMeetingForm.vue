@@ -28,7 +28,6 @@
             addNewMeeting() {
                 this.error = false;
                 if (this.newMeeting.name) {
-                  console.log(this.newMeeting.date);
                     this.$emit('added', this.newMeeting);
                     this.newMeeting = {participants: []};
                     this.adding = false;

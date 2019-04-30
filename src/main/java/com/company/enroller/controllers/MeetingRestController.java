@@ -2,6 +2,7 @@ package com.company.enroller.controllers;
 
 import java.util.Collection;
 
+import org.hibernate.HibernateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,6 +58,16 @@ public class MeetingRestController {
         } else {
     	    // particpant already enrolled
             return new ResponseEntity<String>("Participant already enrolled", HttpStatus.CONFLICT);
+        }
+    }
+
+    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+    public ResponseEntity<?> removeParticipant(@PathVariable("id") long meetingId, @RequestBody String login) {
+        try {
+            Meeting updatedMeeting = meetingService.delete(meetingId, login);
+            return new ResponseEntity<Meeting>(updatedMeeting, HttpStatus.OK);
+        } catch (HibernateException e) {
+            return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

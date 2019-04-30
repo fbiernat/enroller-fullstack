@@ -40,7 +40,6 @@
                 });
             },
             addNewMeeting(meeting) {
-                // this.meetings.push(meeting);
                 this.$http.post('meetings', meeting)
                 .then(response => {
                     Utils.notify(this, 'success', 'Dodano zajęcia', 'Pomyślnie dodano zajęcia');
@@ -54,15 +53,25 @@
                 let url = 'meetings/' + meeting.id;
                 this.$http.post(url, this.username)
                 .then(response => {
+                    this.meetings.find(m => m.id == meeting.id).participants = response.data.participants;
                     Utils.notify(this, 'success', 'Zapisano na zajęcia', 'Zapis na zajęcia przebiegł pomyślnie');
-                    this.loadMeetings();
                 })
                 .catch(response => {
                     Utils.notify(this, 'error', 'Błąd podczas zapisu na zajęcia', 'Nie udało się dopisać Cię do zajęć, spróbój później');
                 });
             },
             removeMeetingParticipant(meeting) {
-                meeting.participants.splice(meeting.participants.indexOf(this.username), 1);
+                let url = 'meetings/' + meeting.id;
+                this.$http.put(url, this.username)
+                .then(response => {
+                    // Modify state with response object, instead of new request for all meetings
+                    this.meetings.find(m => m.id == meeting.id).participants = response.data.participants;
+                    Utils.notify(this, 'success', 'Wypisano z zajęć', 'Pomyślnie wypisano z zajęć');
+                })
+                .catch(response => {
+                    console.log(response);
+                    Utils.notify(this, 'error', 'Błąd podczas wypisywania z zajęć', 'Nieudana próba wypisania z zajęc');
+                });
             },
             deleteMeeting(meeting) {
                 this.meetings.splice(this.meetings.indexOf(meeting), 1);
