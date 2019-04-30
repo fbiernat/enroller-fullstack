@@ -1,24 +1,30 @@
 <template>
-  <div id="app">
-    <notifications group="main-notifications" position="top center" classes="my-notification" width="400px"/>
-    <h1>
-      <img src="./assets/logo.svg" alt="Enroller" class="logo">
-      System do zapisów na zajęcia
-    </h1>
-    <div v-if="!authenticatedUsername">
-      <button class="button" :class="{ 'button-outline': registering}" @click="registering = false">Loguję się</button>
-      <button class="button" :class="{ 'button-outline': !registering}" @click="registering = true">Rejestruję się</button>
-      <div>
-      <login-form @login="registering ? register($event) : login($event)" :button-label="loginButtonLabel"></login-form>
+  <div id="container" v-cloak>
+    <div id="app">
+      <notifications group="main-notifications" position="top center" classes="my-notification" width="400px"/>
+      <h1 id="app-title">
+        <img src="./assets/logo.svg" alt="Enroller" class="logo">
+        System do zapisów na zajęcia
+      </h1>
+      <div v-if="!authenticatedUsername">
+        <button class="button" :class="{ 'button-outline': registering}" @click="registering = false">Loguję się</button>
+        <button class="button" :class="{ 'button-outline': !registering}" @click="registering = true">Rejestruję się</button>
+        <div>
+        <login-form @login="registering ? register($event) : login($event)" :button-label="loginButtonLabel"></login-form>
+      </div>
+      </div>
+      <div v-else>
+        <h2>
+          Witaj {{ authenticatedUsername }}!
+          <a @click="logout()" class="float-right button-outline button">Wyloguj</a>
+        </h2>
+        <meetings-page :username="authenticatedUsername"></meetings-page>
+      </div>
     </div>
-    </div>
-    <div v-else>
-      <h2>
-        Witaj {{ authenticatedUsername }}!
-        <a @click="logout()" class="float-right button-outline button">Wyloguj</a>
-      </h2>
-      <meetings-page :username="authenticatedUsername"></meetings-page>
-    </div>
+
+    <footer>
+      enroller 2019
+    </footer>
   </div>
 </template>
 
@@ -133,9 +139,34 @@
 </script>
 
 <style>
+
+body, html {
+  margin: 0;
+  height: 100vh;
+}
+
+#container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 #app {
   max-width: 1000px;
-  margin: 30px auto;
+  min-height: calc(100vh - 90px);
+  margin: 0 auto 20px;
+  flex: 1 0 auto;
+}
+
+#app-title {
+  margin-top: 25px;
+}
+
+footer {
+  flex-shrink: 0;
+  height: 30px;
+  text-align: center;
+  font-size: 9pt;
 }
 
 .logo {
@@ -151,6 +182,8 @@
   color: #ffffff;
   background: #44a4fc;
   border-bottom: 5px solid #187fe7;
+
+  opacity: 0.95;
 }
 
 .my-notification.warn {

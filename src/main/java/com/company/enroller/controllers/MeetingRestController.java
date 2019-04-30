@@ -32,8 +32,9 @@ public class MeetingRestController {
         Collection<Meeting> meetings = meetingService.getAll();
         return new ResponseEntity<Collection<Meeting>>(meetings, HttpStatus.OK);
     }
-    
-    @RequestMapping(value = "", method = RequestMethod.POST) 
+
+    // TODO refactor to use exceptions to simplify this method conditional statements
+    @RequestMapping(value = "", method = RequestMethod.POST)
     public ResponseEntity<?> addMeeting(@RequestBody Meeting meeting) {
     	if (meetingService.get(meeting.getId()) != null)
     		return new ResponseEntity<String>("Meeting already exist", HttpStatus.CONFLICT);
@@ -41,7 +42,8 @@ public class MeetingRestController {
     		return new ResponseEntity<String>("Unable to add meeting", HttpStatus.INTERNAL_SERVER_ERROR);
     	return new ResponseEntity<Meeting>(meeting, HttpStatus.CREATED);
     }
-    
+
+    // TODO refactor to use exceptions to simplify this method conditional statements
     @RequestMapping(value = "/{id}", method = RequestMethod.POST) 
     public ResponseEntity<?> addParticipant(@PathVariable("id") long meetingId, @RequestBody String participantLogin) {
     	Participant participant = participantService.findByLogin(participantLogin);
@@ -64,10 +66,20 @@ public class MeetingRestController {
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     public ResponseEntity<?> removeParticipant(@PathVariable("id") long meetingId, @RequestBody String login) {
         try {
-            Meeting updatedMeeting = meetingService.delete(meetingId, login);
+            Meeting updatedMeeting = meetingService.removeParticipant(meetingId, login);
             return new ResponseEntity<Meeting>(updatedMeeting, HttpStatus.OK);
         } catch (HibernateException e) {
             return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteMeeting(@PathVariable("id") long meetingId) {
+        try {
+            meetingService.delete(meetingId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (HibernateException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

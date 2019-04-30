@@ -42,8 +42,9 @@
             addNewMeeting(meeting) {
                 this.$http.post('meetings', meeting)
                 .then(response => {
+                    this.meetings.push(response.data);
                     Utils.notify(this, 'success', 'Dodano zajęcia', 'Pomyślnie dodano zajęcia');
-                    this.loadMeetings();
+                    // this.loadMeetings();
                 })
                 .catch(response => {
                     Utils.notify(this, 'error', 'Bład dodawania zajęć', 'Wystąpił błąd w trakcie dodawania zajęć');
@@ -53,7 +54,7 @@
                 let url = 'meetings/' + meeting.id;
                 this.$http.post(url, this.username)
                 .then(response => {
-                    this.meetings.find(m => m.id == meeting.id).participants = response.data.participants;
+                    this.meetings.find(m => m.id === meeting.id).participants = response.data.participants;
                     Utils.notify(this, 'success', 'Zapisano na zajęcia', 'Zapis na zajęcia przebiegł pomyślnie');
                 })
                 .catch(response => {
@@ -65,7 +66,7 @@
                 this.$http.put(url, this.username)
                 .then(response => {
                     // Modify state with response object, instead of new request for all meetings
-                    this.meetings.find(m => m.id == meeting.id).participants = response.data.participants;
+                    this.meetings.find(m => m.id === meeting.id).participants = response.data.participants;
                     Utils.notify(this, 'success', 'Wypisano z zajęć', 'Pomyślnie wypisano z zajęć');
                 })
                 .catch(response => {
@@ -74,7 +75,17 @@
                 });
             },
             deleteMeeting(meeting) {
-                this.meetings.splice(this.meetings.indexOf(meeting), 1);
+                // this.meetings.splice(this.meetings.indexOf(meeting), 1);
+                let url = 'meetings/' + meeting.id;
+                this.$http.delete(url)
+                .then(response => {
+                    this.meetings = this.meetings.filter(m => m.id !== meeting.id);
+                    Utils.notify(this, 'success', 'Usunięto zajęcia', 'Pomyślnie usunięto zajęcia');
+                })
+                .catch(response => {
+                    console.log(response);
+                    Utils.notify(this, 'error', 'Błąd', 'Błąd podczas usuwania zajęć');
+                });
             }
         },
         mounted() {

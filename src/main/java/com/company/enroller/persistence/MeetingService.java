@@ -56,7 +56,7 @@ public class MeetingService {
 		}
 	}
 
-	public Meeting delete(long meetingId, String login) throws HibernateException {
+	public Meeting removeParticipant(long meetingId, String login) throws HibernateException {
     	Meeting meeting = this.get(meetingId);
 		Participant participant = participantService.findByLogin(login);
 		Transaction transaction = connector.getSession().beginTransaction();
@@ -65,6 +65,13 @@ public class MeetingService {
     	transaction.commit();
 
     	return meeting;
+	}
+
+	public void delete(long meetingId) throws HibernateException {
+		Meeting meeting = this.get(meetingId);
+		Transaction transaction = connector.getSession().beginTransaction();
+		connector.getSession().delete(meeting);
+		transaction.commit();
 	}
 
 }
