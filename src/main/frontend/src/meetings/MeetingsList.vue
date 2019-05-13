@@ -18,13 +18,13 @@
       </td>
       <td>{{ meeting.description }}</td>
       <td>
-        <ul v-if="meeting.participants">
+        <ul v-if="meeting.participants" class="participant-list">
           <li v-for="participant in meeting.participants" :key="participant.login">
             {{ participant.login }}
           </li>
         </ul>
       </td>
-      <td style="text-align: right; min-width: 400px">
+      <td class="controls">
         <button v-if="meeting.participants.find(o => o.login === username) == null" class="button-outline"
                 @click="$emit('attend', meeting)">
           Zapisz się
@@ -44,3 +44,22 @@
         props: ['meetings', 'username']
     }
 </script>
+
+<style>
+  .controls {
+    text-align: right;
+    min-width: 400px;
+  }
+
+  td > * {
+    vertical-align: middle;
+  }
+
+.participant-list {
+  margin: 0;
+}
+
+  .participant-list li {
+    margin: 0;
+  }
+</style>

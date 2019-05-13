@@ -51,7 +51,7 @@
                 });
             },
             addMeetingParticipant(meeting) {
-                let url = 'meetings/' + meeting.id;
+                let url = 'meetings/' + meeting.id + '/participants';
                 this.$http.post(url, this.username)
                 .then(response => {
                     this.meetings.find(m => m.id === meeting.id).participants = response.data.participants;
@@ -62,8 +62,8 @@
                 });
             },
             removeMeetingParticipant(meeting) {
-                let url = 'meetings/' + meeting.id;
-                this.$http.put(url, this.username)
+                let url = 'meetings/' + meeting.id + '/participants/' + this.username;
+                this.$http.delete(url)
                 .then(response => {
                     // Modify state with response object, instead of new request for all meetings
                     this.meetings.find(m => m.id === meeting.id).participants = response.data.participants;
