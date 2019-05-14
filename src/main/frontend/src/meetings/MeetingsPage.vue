@@ -52,7 +52,7 @@
             },
             addMeetingParticipant(meeting) {
                 let url = 'meetings/' + meeting.id + '/participants';
-                this.$http.post(url, this.username)
+                this.$http.post(url)
                 .then(response => {
                     this.meetings.find(m => m.id === meeting.id).participants = response.data.participants;
                     Utils.notify(this, 'success', 'Zapisano na zajęcia', 'Zapis na zajęcia przebiegł pomyślnie');
