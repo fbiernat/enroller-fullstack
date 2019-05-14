@@ -2,6 +2,8 @@ package com.company.enroller.controllers;
 
 import java.util.Collection;
 
+import com.company.enroller.exceptions.ItemAlreadyExistException;
+import com.company.enroller.security.UserProvider;
 import org.hibernate.HibernateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -43,28 +45,26 @@ public class MeetingRestController {
     	return new ResponseEntity<>(meeting, HttpStatus.CREATED);
     }
 
-    // TODO refactor to use exceptions to simplify this method conditional statements
     @RequestMapping(value = "/{id}/participants", method = RequestMethod.POST)
-    public ResponseEntity<?> addParticipant(@PathVariable("id") long meetingId, @RequestBody String participantLogin) {
-    	Participant participant = participantService.findByLogin(participantLogin);
+    public ResponseEntity<?> addParticipant(@PathVariable("id") long meetingId) {
+        String username = UserProvider.getUsername();
+    	Participant participant = participantService.findByLogin(username);
     	Meeting meeting = meetingService.get(meetingId);
     	if (meeting == null) {
     		return new ResponseEntity<>("Meeting doesn't exist", HttpStatus.BAD_REQUEST);
     	}
-    	if (!meeting.hasParticipant(participant)) {
+        try {
             Meeting result = (Meeting) meetingService.addParticipant(meeting, participant);
-            if (result == null) {
-                return new ResponseEntity<>("Unable to add participant", HttpStatus.INTERNAL_SERVER_ERROR);
-            }
             return new ResponseEntity<>(result, HttpStatus.CREATED);
-        } else {
-    	    // particpant already enrolled
+        } catch (HibernateException e) {
+            return new ResponseEntity<>("Unable to add participant", HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (ItemAlreadyExistException e) {
             return new ResponseEntity<>("Participant already enrolled", HttpStatus.CONFLICT);
         }
     }
 
     @RequestMapping(value = "/{id}/participants/{login}", method = RequestMethod.DELETE)
-    public ResponseEntity<?> removeParticipant(@PathVariable("id") long meetingId, @PathVariable String login) {
+    public ResponseEntity<?> removeParticipant(@PathVariable("id") long meetingId, @PathVariable("login") String login) {
         try {
             Meeting updatedMeeting = meetingService.removeParticipant(meetingId, login);
             return new ResponseEntity<>(updatedMeeting, HttpStatus.OK);

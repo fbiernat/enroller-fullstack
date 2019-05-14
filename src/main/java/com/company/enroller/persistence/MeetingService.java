@@ -2,6 +2,7 @@ package com.company.enroller.persistence;
 
 import java.util.Collection;
 
+import com.company.enroller.exceptions.ItemAlreadyExistException;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Transaction;
@@ -44,16 +45,14 @@ public class MeetingService {
 		}
 	}
 
-	public Object addParticipant(Meeting meeting, Participant participant) {
-		try {
-			meeting.addParticipant(participant);
-			Transaction transaction = connector.getSession().beginTransaction();
-			connector.getSession().save(meeting);
-			transaction.commit();
-			return meeting;
-		} catch (HibernateException e) {
-			return null;
-		}
+	public Object addParticipant(Meeting meeting, Participant participant) throws HibernateException, ItemAlreadyExistException {
+    	if (meeting.hasParticipant(participant))
+    		throw new ItemAlreadyExistException();
+		meeting.addParticipant(participant);
+		Transaction transaction = connector.getSession().beginTransaction();
+		connector.getSession().save(meeting);
+		transaction.commit();
+		return meeting;
 	}
 
 	public Meeting removeParticipant(long meetingId, String login) throws HibernateException {
