@@ -58,7 +58,7 @@
                     Utils.notify(this, 'success', 'Zapisano na zajęcia', 'Zapis na zajęcia przebiegł pomyślnie');
                 })
                 .catch(response => {
-                    Utils.notify(this, 'error', 'Błąd podczas zapisu na zajęcia', 'Nie udało się dopisać Cię do zajęć, spróbój później');
+                    Utils.notify(this, 'error', 'Błąd podczas zapisu na zajęcia', 'Nie udało się dopisać Cię do zajęć, spróbuj później');
                 });
             },
             removeMeetingParticipant(meeting) {
