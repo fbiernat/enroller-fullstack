@@ -2,6 +2,7 @@ package com.company.enroller.controllers;
 
 import com.company.enroller.model.Participant;
 import com.company.enroller.persistence.ParticipantService;
+import com.company.enroller.security.UserProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,9 @@ public class ParticipantRestController {
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     public ResponseEntity<?> getAll() {
+        if (!UserProvider.getUsername().equalsIgnoreCase("admin")) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
         Collection<Participant> participants = participantService.getAll();
         return new ResponseEntity<Collection<Participant>>(participants, HttpStatus.OK);
     }
