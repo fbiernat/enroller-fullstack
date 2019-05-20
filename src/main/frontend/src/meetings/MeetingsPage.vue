@@ -2,7 +2,7 @@
   <div>
     <new-meeting-form @added="addNewMeeting($event)"></new-meeting-form>
 
-    <span v-if="meetings.length == 0">
+    <span v-if="meetings.length === 0">
                Brak zaplanowanych spotkań.
            </span>
     <h3 v-else>
@@ -44,7 +44,6 @@
                 .then(response => {
                     this.meetings.push(response.data);
                     Utils.notify(this, 'success', 'Dodano zajęcia', 'Pomyślnie dodano zajęcia');
-                    // this.loadMeetings();
                 })
                 .catch(response => {
                     Utils.notify(this, 'error', 'Bład dodawania zajęć', 'Wystąpił błąd w trakcie dodawania zajęć');
@@ -75,7 +74,6 @@
                 });
             },
             deleteMeeting(meeting) {
-                // this.meetings.splice(this.meetings.indexOf(meeting), 1);
                 let url = 'meetings/' + meeting.id;
                 this.$http.delete(url)
                 .then(response => {
