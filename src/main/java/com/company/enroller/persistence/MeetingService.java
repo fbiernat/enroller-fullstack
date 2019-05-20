@@ -34,15 +34,11 @@ public class MeetingService {
     	return (Meeting) connector.getSession().get(Meeting.class, meetingId);
     }
 
-	public Object add(Meeting meeting) {
-		try {
-			Transaction transaction = connector.getSession().beginTransaction();
-			connector.getSession().save(meeting);
-			transaction.commit();
-			return meeting;
-		} catch (HibernateException e) {
-			return null;
-		}
+	public Object add(Meeting meeting) throws HibernateException {
+		Transaction transaction = connector.getSession().beginTransaction();
+		connector.getSession().save(meeting);
+		transaction.commit();
+		return meeting;
 	}
 
 	public Object addParticipant(Meeting meeting, Participant participant) throws HibernateException, ItemAlreadyExistException {

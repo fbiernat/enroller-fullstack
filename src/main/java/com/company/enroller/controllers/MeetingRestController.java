@@ -35,14 +35,16 @@ public class MeetingRestController {
         return new ResponseEntity<>(meetings, HttpStatus.OK);
     }
 
-    // TODO refactor to use exceptions to simplify this method conditional statements
     @RequestMapping(value = "", method = RequestMethod.POST)
     public ResponseEntity<?> addMeeting(@RequestBody Meeting meeting) {
     	if (meetingService.get(meeting.getId()) != null)
     		return new ResponseEntity<>("Meeting already exist", HttpStatus.CONFLICT);
-    	if (meetingService.add(meeting) == null) 
+    	try {
+            meetingService.add(meeting);
+    	    return new ResponseEntity<>(meeting, HttpStatus.CREATED);
+        } catch (HibernateException e) {
     		return new ResponseEntity<>("Unable to add meeting", HttpStatus.INTERNAL_SERVER_ERROR);
-    	return new ResponseEntity<>(meeting, HttpStatus.CREATED);
+        }
     }
 
     @RequestMapping(value = "/{id}/participants", method = RequestMethod.POST)
