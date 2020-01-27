@@ -153,6 +153,7 @@ body, html {
 
 #app {
   max-width: 1000px;
+  width: 100%;
   min-height: calc(100vh - 90px);
   margin: 0 auto 20px;
   flex: 1 0 auto;
