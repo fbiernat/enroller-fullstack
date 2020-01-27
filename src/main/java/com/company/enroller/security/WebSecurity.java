@@ -29,7 +29,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 	
 	@Value("${security.token_expiration_in_seconds}")
 	private int tokenExpiration;
-	
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.csrf().disable()
@@ -42,7 +42,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 			.addFilter(new JWTAuthorizationFilter(authenticationManager(), secret))
 			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);			
 	}
-	
+
 	@Override
 	public void configure(AuthenticationManagerBuilder auth) throws Exception {
 	   auth.userDetailsService(participantProvider).passwordEncoder(passwordEncoder);
